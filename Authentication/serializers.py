@@ -12,6 +12,14 @@ class UserAccountSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['user', 'real_name', 'country', 'phone']
 
 
+class UserAccountRegistrationSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(max_length=128)
+    real_name = serializers.CharField(max_length=200)
+    country = serializers.CharField(max_length=200)
+    phone = serializers.IntegerField()
+
+
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
