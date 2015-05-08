@@ -13,6 +13,7 @@ class UserAccountSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserAccountRegistrationSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=200)
     email = serializers.EmailField()
     password = serializers.CharField(max_length=128)
     real_name = serializers.CharField(max_length=200)

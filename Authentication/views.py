@@ -44,11 +44,11 @@ class UserAccountRegistration(GenericAPIView):
         else:
             user = self._register_user_account(serializer.data)
             return Response({
-                'email': user.email
+                'username': user.username
             })
 
     def _register_user_account(self, validated_data):
-        user = User(username=validated_data['email'],
+        user = User(username=validated_data['username'],
                     email=validated_data['email'],
                     is_active=True)
         user.set_password(validated_data['password'])
