@@ -9,7 +9,7 @@ class UserAccountSerializer(serializers.HyperlinkedModelSerializer):
     "Serializer for the UserAccount class"
     class Meta:
         model = UserAccount
-        fields = ['user', 'real_name', 'country', 'phone']
+        fields = ['user', 'real_name', 'country', 'phone', 'topics']
 
 
 class UserAccountRegistrationSerializer(serializers.Serializer):
