@@ -1,9 +1,11 @@
-from backend.settings import TWITTER
-
+import operator
 import requests
+
 from django_rq import job
 from TwitterAPI import TwitterAPI
 
+from backend.settings import TWITTER
+from Topics.models import Feed, New, Topic
 
 def _auth_twitter_api():
     return TwitterAPI(consumer_key=TWITTER['CONSUMER_KEY'],
@@ -16,20 +18,30 @@ def _auth_twitter_api():
 def _search_feeds_for_topic(topic):
     twitter = _auth_twitter_api()
     request = twitter.request('users/search', {'q': topic})
-    ranked_users = {}
-    for user in request:
-        name = user.screen_name
-        rating = user.followers / user.favourites
-        ranked_users[name] = rating
-        print(user)
+    ranked_feeds = {}
+    for feed in request.json():
+        print(feed)
+        name = feed['screen_name']
+        rating = feed['followers_count']
+        if feed["friends_count"] != 0:
+            rating = rating / feed['friends_count']
+        ranked_feeds[name] = rating
+    sorted_feeds = sorted(ranked_feeds.items(), key=operator.itemgetter(1))
+    parent_topic = Topic.objects.get_or_create(name=topic)[0]
+    for feed in sorted_feeds[:5]:
+        feed = Feed.objects.get_or_create(name=feed[0])[0]
+        feed.save()
+        feed.topics.add(parent_topic.pk)
 
 
 @job("default")
 def _search_latest_news_for_feed(feed):
     twitter = _auth_twitter_api()
     request = twitter.request('statuses/user_timeline', {"screen_name": feed})
+    feed_object = Feed.objects.get(name=feed)
     for new in request:
-        print(new.text)
+        new_new = New(text=new['text'], account=feed_object)
+        new_new.save()
 
 
 def program_feed_discovery(topic):
