@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^v1/login', obtain_auth_token, name='auth-token'),
     url(r'^v1/', include(router_v1.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^django-rq/', include('django_rq.urls'))
 ]

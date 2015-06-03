@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'django_rq',
     'rest_framework',
     'rest_framework.authtoken',
     'Authentication',
@@ -117,4 +118,24 @@ REST_FRAMEWORK = {
         ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'PAGINATE_BY': 25,
+}
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    },
+    'high': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+    },
+}
+
+TWITTER = {
+    "CONSUMER_KEY": "",
+    "CONSUMER_SECRET": "",
+    "TOKEN_KEY": "",
+    "TOKEN_SECRET": ""
 }
