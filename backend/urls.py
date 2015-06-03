@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from rest_framework import routers
+from rest_framework.authtoken.views import obtain_auth_token
 
 from Authentication import views as AuthViews
 from Topics import views as TopicViews
@@ -21,6 +22,7 @@ urlpatterns = [
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^v1/register', AuthViews.UserAccountRegistration.as_view()),
+    url(r'^v1/login', obtain_auth_token, name='auth-token'),
     url(r'^v1/', include(router_v1.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

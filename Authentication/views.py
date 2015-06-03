@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 
-from rest_framework import viewsets, status
+from rest_framework.authtoken.models import Token
 from rest_framework.generics import GenericAPIView
+from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -53,6 +54,7 @@ class UserAccountRegistration(GenericAPIView):
                     is_active=True)
         user.set_password(validated_data['password'])
         user.save()
+        Token.objects.create(user=user)
         account = UserAccount(
             user=user,
             real_name=validated_data['real_name'],
