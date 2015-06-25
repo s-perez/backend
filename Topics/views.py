@@ -95,5 +95,13 @@ class NewViewSet (viewsets.ModelViewSet):
     REST view that allows to retrieve news from the logged user
     """
     serializer_class = NewSerializer
+    #queryset = New.objects.all()
 
-    queryset = New.objects.all()
+    def get_queryset(self):
+        """
+        This view should return a list of all the topics
+        for the currently authenticated user.
+        """
+        user = self.request.user
+        topics = Topic.objects.filter(accounts__user=user)
+        return New.objects.filter(topic__in=topics).order_by('date_written')
