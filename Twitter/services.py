@@ -20,7 +20,6 @@ def _search_feeds_for_topic(topic):
     request = twitter.request('users/search', {'q': topic})
     ranked_feeds = {}
     for feed in request.json():
-        print(feed)
         name = feed['screen_name']
         rating = feed['followers_count']
         if feed["friends_count"] != 0:
