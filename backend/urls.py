@@ -12,6 +12,9 @@ router_v1.register(r'users', AuthViews.UserViewSet)
 router_v1.register(r'accounts', AuthViews.UserAccountViewSet)
 router_v1.register(r'new', TopicViews.NewViewSet, base_name="new")
 router_v1.register(r'feed', TopicViews.FeedViewSet, base_name="feed")
+router_v1.register(r'topic/subscriptions',
+                   TopicViews.TopicSubscription,
+                   base_name="subscriptions")
 router_v1.register(r'topic', TopicViews.TopicViewSet, base_name="topic")
 
 
