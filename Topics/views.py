@@ -6,10 +6,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from Authentication.models import UserAccount
+from Twitter.services import program_feed_discovery
 from .models import Topic, Feed, New
 from .serializers import (TopicSerializer,
                           NewSerializer,
                           FeedSerializer)
+
+def get_user_from_request(request):
+    token = request.auth
+    return User.objects.get(auth_token__key=token)
 
 class TopicViewSet (viewsets.ModelViewSet):
     """
@@ -22,37 +27,25 @@ class TopicViewSet (viewsets.ModelViewSet):
         This view should return a list of all the topics
         for the currently authenticated user.
         """
-        user = self.request.user
+        user = get_user_from_request(self.request)
+        print(user)
         return Topic.objects.filter(accounts__user=user)
 
 class TopicSubscription(GenericAPIView):
 
-    serializer_class = TopicSerializer
-
-
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        user = get_user_from_request(self.request)
+        if Topic.objects.filter(name=request.POST.get('name')).exists():
+            topic = Topic.objects.get(name=request.POST.get('name'))
         else:
-            pk = getattr(self.request.auth, "account", None).pk
-            user = User.objects.get(pk=pk)
-            if Topic.objects.filter(name=serializer.data.name).exists():
-                topic = Topic.objects.get(name=serializer.data.name)
-
-            else:
-                topic = self._subscribe_topic(serializer.data)
-
-            account = UserAccount.objects.get(user=user)
-            account.topics.add(topic)
-            return Response({
-                'name':topic.name
-            })
-    def _subscribe_topic(self, validated_data):
-        topic = Topic(name=validated_data['name'])
+            topic = self._subscribe_topic(request.POST.get('name'))
+        account = UserAccount.objects.get(user=user)
+        account.topics.add(topic)
+        return Response({
+            'name':topic.name
+        })
+    def _subscribe_topic(self, name):
+        topic = Topic(name=name)
         program_feed_discovery(topic.name)
         topic.save()
         return topic
@@ -95,13 +88,13 @@ class NewViewSet (viewsets.ModelViewSet):
     REST view that allows to retrieve news from the logged user
     """
     serializer_class = NewSerializer
-    #queryset = New.objects.all()
+    queryset = New.objects.all()
 
-    def get_queryset(self):
-        """
-        This view should return a list of all the topics
-        for the currently authenticated user.
-        """
-        user = self.request.user
-        topics = Topic.objects.filter(accounts__user=user)
-        return New.objects.filter(topic__in=topics).order_by('date_written')
+#    def get_queryset(self):
+#        """
+#        This view should return a list of all the topics
+#        for the currently authenticated user.
+#        """
+#        user = self.request.user
+#        topics = Topic.objects.filter(accounts__user=user)
+#        return New.objects.filter(topic__in=topics).order_by('date_written')
