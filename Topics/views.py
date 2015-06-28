@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
+from django.http import QueryDict
 
+import simplejson as json
 from rest_framework import viewsets, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
@@ -51,28 +53,19 @@ class TopicSubscription(GenericAPIView):
         return topic
 
     def delete(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
+        body = json.loads(request.body)
+        user = get_user_from_request(self.request)
+        account = UserAccount.objects.get(user=user)
+        if Topic.objects.filter(name=body.get('name')).exists():
+            topic = Topic.objects.get(name=body.get('name'))
+            if account.topics.filter(name=body.get('name')).exists():
+                account.topics.remove(topic.pk)
+            return Response(status=200)
+        else:
             return Response(
-                serializer.errors,
+                {},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        else:
-            pk = getattr(self.request.auth, "account", None).pk
-            user = User.objects.get(pk=pk)
-            account = UserAccount.objects.get(user=user)
-            if Topic.objects.filter(name=serializer.data.name).exists():
-                topic = Topic.objects.filter(name=serializer.data.name)
-                account.topics.remove(topic)
-                return Response(
-                    {},
-                    status=200
-                )
-            else:
-                return Response(
-                    {},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
 
 class FeedViewSet (viewsets.ModelViewSet):
     """
