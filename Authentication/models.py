@@ -10,4 +10,6 @@ class UserAccount(models.Model):
     phone = models.IntegerField(blank=True)
     topics = models.ManyToManyField(Topic, related_name="accounts")
 
+    def __str__(self):
+        return "({0}) {1}".format(self.user.username, self.real_name)
 
