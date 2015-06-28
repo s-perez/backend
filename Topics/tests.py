@@ -1,5 +1,7 @@
 from django.test import TestCase
+from django.test.client import RequestFactory
 
+from datetime import datetime
 from model_mommy import mommy
 
 from .models import (Feed,
@@ -33,25 +35,19 @@ class FeedSerializerTestCase(TestCase):
 
 class NewSerializerTestCase(TestCase):
     def test_new_serializer(self):
-        feed = mommy.make(Feed)
-        url = "http://localhost:9000/v1/new/{}".format(feed.pk)
-        new = mommy.prepare(New, account=url)
-        serializer = FeedSerializer(new)
+        feed = Feed(name="F1")
+        feed.save()
+        url = "http://testserver/v1/feed/{}/".format(feed.pk)
+        new = New(account=feed, text="Text1")
+        new.save()
+        request = RequestFactory().get("/v1/new/{}".format(new.pk))
+        serializer = NewSerializer(new, context={"request": request})
         self.assertEqual(serializer.data, {
-            "account": new.account,
+            "account": url,
             "text": new.text,
-            "date_added": new.date_added,
-            "date_written": new.date_written
+            "date_added": new.date_added.isoformat().replace('+00:00', 'Z'),
+            "date_written": new.date_written.isoformat().replace('+00:00', 'Z')
         })
-
-    def test_new_data_serializer(self):
-        data = {
-            "text": "T1",
-            "date_added": None,
-            "date_written": None
-        }
-        serializer = NewSerializer(data=data)
-        self.assertTrue(serializer.is_valid())
 
 
 class TopicSerializerTestCase(TestCase):
